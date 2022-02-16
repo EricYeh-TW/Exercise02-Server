@@ -20,10 +20,10 @@ const database = {
     users: [
         {
             id: "123",
-            name: "john",
-            email: "john@gmail.com",
+            name: "test",
+            email: "test@",
             password: "123",
-            entries: "0",
+            entries: 0,
             joined: new Date(),
         },
         {
@@ -31,7 +31,7 @@ const database = {
             name: "sally",
             email: "sally@gmail.com",
             password: "456",
-            entries: "0",
+            entries: 0,
             joined: new Date(),
         },
     ],
@@ -67,8 +67,8 @@ app.get("/profile/:id", (req, res) => {
     found(id, req, res);
 });
 
-app.post("/image", (req, res) => {
-    const id = req.body.id;
+app.put("/image", (req, res) => {
+    const { id } = req.body;
     let found = false;
     database.users.forEach((user) => {
         if (user.id === id) {
