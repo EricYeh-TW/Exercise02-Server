@@ -1,7 +1,18 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const app = express();
+const knex = require('knex')({
+    client: 'pg',
+    connection: {
+        host: '127.0.0.1',
+        port: 5432,
+        user: 'postgres',
+        password: '864900',
+        database: 'smart-brain',
+    },
+});
+
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -13,61 +24,60 @@ const found = (id, req, res) => {
             return res.json(user);
         }
     });
-    return res.status(404).json("no data");
+    return res.status(404).json('no data');
 };
 
 const database = {
     users: [
         {
-            id: "123",
-            name: "test",
-            email: "test@",
-            password: "123",
+            id: '123',
+            name: 'test',
+            email: 'test@',
+            password: '123',
             entries: 0,
             joined: new Date(),
         },
         {
-            id: "456",
-            name: "sally",
-            email: "sally@gmail.com",
-            password: "456",
+            id: '456',
+            name: 'sally',
+            email: 'sally@gmail.com',
+            password: '456',
             entries: 0,
             joined: new Date(),
         },
     ],
 };
 
-app.get("/", (req, res) => {
+app.get('/', (req, res) => {
     res.send(database.users);
 });
 
-app.post("/signin", (req, res) => {
+app.post('/signin', (req, res) => {
     if (req.body.email === database.users[0].email && req.body.password === database.users[0].password) {
         res.json(database.users[0]);
     } else {
-        res.status(400).json("error logging in");
+        res.status(400).json('error logging in');
     }
 });
 
-app.post("/register", (req, res) => {
+app.post('/register', (req, res) => {
     const { email, name, password } = req.body;
-    database.users.push({
-        id: "125",
-        name: name,
-        email: email,
-        password: password,
-        entries: "0",
-        joined: new Date(),
-    });
-    res.json(database.users[database.users.length - 1]);
+    knex('users')
+        .returning('*')
+        .insert({
+            email: email,
+            name: name,
+            joined: new Date(),
+        })
+        .then((response) => res.json(response));
 });
 
-app.get("/profile/:id", (req, res) => {
+app.get('/profile/:id', (req, res) => {
     const id = req.params.id;
     found(id, req, res);
 });
 
-app.put("/image", (req, res) => {
+app.put('/image', (req, res) => {
     const { id } = req.body;
     let found = false;
     database.users.forEach((user) => {
@@ -77,9 +87,9 @@ app.put("/image", (req, res) => {
             return res.json(user.entries);
         }
     });
-    return res.status(404).json("no data");
+    return res.status(404).json('no data');
 });
 
 app.listen(3001, () => {
-    console.log("app is running on port 3001");
+    console.log('app is running on port 3001');
 });
