@@ -18,13 +18,19 @@ app.use(cors());
 
 const found = (id, req, res) => {
     let found = false;
-    database.users.forEach((user) => {
-        if (user.id === id) {
-            found = true;
-            return res.json(user);
-        }
-    });
-    return res.status(404).json('no data');
+    knex.select('*')
+        .from('users')
+        .where({
+            id: id,
+        })
+        .then((user) => {
+            if (user.length) {
+                res.json(user[0]);
+            } else {
+                res.status(400).json('no data');
+            }
+        })
+        .catch((err) => res.status(400).json('error'));
 };
 
 const database = {
@@ -69,7 +75,8 @@ app.post('/register', (req, res) => {
             name: name,
             joined: new Date(),
         })
-        .then((response) => res.json(response));
+        .then((user) => res.json(user))
+        .catch((err) => res.status(404).json('unable to register'));
 });
 
 app.get('/profile/:id', (req, res) => {
