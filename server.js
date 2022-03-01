@@ -86,15 +86,14 @@ app.get('/profile/:id', (req, res) => {
 
 app.put('/image', (req, res) => {
     const { id } = req.body;
-    let found = false;
-    database.users.forEach((user) => {
-        if (user.id === id) {
-            found = true;
-            user.entries++;
-            return res.json(user.entries);
-        }
-    });
-    return res.status(404).json('no data');
+    knex('users')
+        .where('id', '=', id)
+        .increment('entries', 1)
+        .returning('entries')
+        .then((entries) => {
+            res.json(entries[0].entries);
+        })
+        .catch((err) => err.status(400).json('unable get entries'));
 });
 
 app.listen(3001, () => {
